@@ -1,4 +1,4 @@
-#calc-scala
+###calc-scala
 
 calc-scala is a project aimed at creating my own basic language that deals with basic operators such as add, subtract, multiply, divide.
 The main goal is to pass in input in the form of a<B>string</B>, and use parsers to allow us to perform methods on the given input.
@@ -16,8 +16,8 @@ print(x + 3)
 This is a list of statements that should be able to be parsed into our program and evaluate the expressions wanted.
 These
 
-#Goals
+###Goals
 
-#### Learn about parsers, what is a parser, why is it useful?
-#### Learning how to abstractly define our own types for our language
-#### Learn about the atto basic parser library
+##### Learn about parsers, what is a parser, why is it useful?
+##### Learning how to abstractly define our own types for our language
+##### Learn about the atto basic parser library
