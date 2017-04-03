@@ -1,4 +1,9 @@
-import atto._, Atto._, compat.scalaz._
+import atto._
+import Atto._
+import compat.scalaz._
+
+import scala.io.Source
+import scalaz.{-\/, \/-}
 
 object Calc {
   type CalcValue = Int
@@ -53,37 +58,57 @@ object Calc {
 
   def expressionHelperFunction(sign: Parser[Char]) = {
     for {
-      _ <- parenLeftP
+      _ <- char('(')
       e1 <- expressionP
       _ <- many(spaceChar)
       _ <- sign
       _ <- many(spaceChar)
       e2 <- expressionP
-      _ <- parenRightP
+      _ <- char(')')
     } yield (e1, e2)
   }
 
-  val newlineP: Parser[Char] = char('\n')
-  val parenLeftP: Parser[Char] = char('(')
-  val parenRightP: Parser[Char] = char(')')
-  val intP: Parser[Int] = int
-  val constantP: Parser[Expression] = intP.map(x => Constant(x))
-  val addSignP: Parser[Char] = char('+')
-  val subtractSignP: Parser[Char] = char('-')
-  val multiplySignP: Parser[Char] = char('*')
-  val divideSignP: Parser[Char] = char('/')
-//  val negateSignP: Parser[Char] = ???
+  val constantP: Parser[Expression] = int.map(Constant)
+  val variableLookupP: Parser[Expression] = many1(letter).map(letters => VariableLookup(letters.list.toList.mkString))
+  val addP: Parser[Expression] = expressionHelperFunction(char('+')).map(res => Add(res._1, res._2))
+  val subtractP: Parser[Expression] = expressionHelperFunction(char('-')).map(res => Subtract(res._1, res._2))
+  val multiplyP: Parser[Expression] = expressionHelperFunction(char('*')).map(res => Multiply(res._1, res._2))
+  val divideP: Parser[Expression] = expressionHelperFunction(char('/')).map(res => Divide(res._1, res._2))
+  val expressionP: Parser[Expression] = constantP | variableLookupP| addP | subtractP | multiplyP | divideP
 
-  val addP: Parser[Expression] = expressionHelperFunction(addSignP).map(res => Add(res._1, res._2))
-  val subtractP: Parser[Expression] = expressionHelperFunction(subtractSignP).map(res => Subtract(res._1, res._2))
-  val multiplyP: Parser[Expression] = expressionHelperFunction(multiplySignP).map(res => Multiply(res._1, res._2))
-  val divideP: Parser[Expression] = expressionHelperFunction(divideSignP).map(res => Divide(res._1, res._2))
-//  val negateP: Parser[Expression] = expressionHelperFunction(negateSignP).map(res => Negate(res._1))
+  val printP: Parser[Statement] = {
+    for {
+      _ <- string("print")
+      _ <- many(spaceChar)
+      _ <- char('(')
+      _ <- many(spaceChar)
+      e <- expressionP
+      _ <- many(spaceChar)
+      _ <- char(')')
+    } yield Print(e)
+  }
 
-  val expressionP: Parser[Expression] = constantP | addP | subtractP | multiplyP | divideP
+  val assignmentP: Parser[Statement] = {
+    for {
+      v <- many1(letter).map(letters => letters.list.toList.mkString)
+      _ <- many(spaceChar)
+      _ <- char('=')
+      _ <- many(spaceChar)
+      e <- expressionP
+    } yield Assignment(v, e)
+  }
+
+  val nakedExpressionP: Parser[Statement] = {
+    expressionP.map(NakedExpression)
+  }
+  val statementP: Parser[Statement] = printP | assignmentP | nakedExpressionP
+  val programP: Parser[CalcProgram] = sepBy(statementP, many(char('\n')))
 
   def main(args: Array[String]): Unit = {
-    val testProgram = expressionP.parseOnly("(1 * 23)").done.option
-    println(testProgram)
+    val stringToParse: String = Source.fromFile("/Users/bass/Code/scala/calc-scala/src/main/resources/example.calc").mkString
+    programP.parseOnly(stringToParse).done.either match {
+      case -\/(error) => println(error)
+      case \/-(program) => run(program)
+    }
   }
 }
