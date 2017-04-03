@@ -1,7 +1,7 @@
 #calc-scala
 
 calc-scala is a project aimed at creating my own basic language that deals with basic operators such as add, subtract, multiply, divide.
-The main goal is to pass in input in the form of a <B>string</B>, and use parsers to allow us to perform methods on the given input.
+The main goal is to pass in input in the form of a <B>string</B> into parsers, that can then be evaluated with the methods we've defined.
 
 For example: 
 
