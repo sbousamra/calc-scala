@@ -36,7 +36,7 @@ object Calc {
     }
   }
 
-  def arithmeticExpressionHelper(sign: Char) = {
+  def arithmeticExpressionHelper(sign: Char): Parser[(Expression, Expression)] = {
     for {
       _ <- char('(')
       n1 <- expressionCombinatorP
