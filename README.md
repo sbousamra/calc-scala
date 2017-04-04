@@ -14,7 +14,6 @@ y
 print(x + 3)
 
 This is a list of statements in the form of a string. We should be able to parse this into our program and evaluate the expressions wanted.
-
 # Goals
 
 ##### Learn about parsers, what is a parser, why is it useful?

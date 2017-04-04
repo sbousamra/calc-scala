@@ -5,8 +5,10 @@ scalaVersion := "2.11.8"
 
 
 libraryDependencies ++= Seq(
-  "org.tpolecat" %% "atto-core"  % "0.5.1",
+  "org.tpolecat" %% "atto-core"            % "0.5.1",
   "org.tpolecat" %% "atto-compat-scalaz71" % "0.5.1",
   "org.tpolecat" %% "atto-compat-scalaz72" % "0.5.1",
-  "org.tpolecat" %% "atto-compat-cats"     % "0.5.1"
+  "org.tpolecat" %% "atto-compat-cats"     % "0.5.1",
+  "org.scalactic" %% "scalactic"           % "3.0.1",
+  "org.scalatest" %% "scalatest"           % "3.0.1" % "test"
 )
