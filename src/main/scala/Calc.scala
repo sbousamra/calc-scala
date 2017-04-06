@@ -1,5 +1,6 @@
 import atto._
 import Atto._
+import atto.Parser.Internal.Fail
 import compat.scalaz._
 
 import scala.io.Source
@@ -7,12 +8,12 @@ import scalaz.{-\/, \/-}
 
 object Calc {
   type Number = Int
-  type Statement = String
-  type Statements = List[Statement]
+  type Environment = Map[String, Expression]
+  type Statements = List[StatementType]
 
 
   sealed trait StatementType
-  case class nakedExpression(e: Expression) extends StatementType
+  case class NakedExpression(e: Expression) extends StatementType
   case class VariableAssignment(name: String, e: Expression) extends StatementType
   case class Print(e: Expression) extends StatementType
 
@@ -25,7 +26,7 @@ object Calc {
   case class VariableLookup(name: String) extends Expression
 
 
-  def evaluate(e: Expression, environment: Map[String, Expression]): Number = {
+  def evaluate(e: Expression, environment: Environment): Number = {
     e match {
       case Constant(n) => n
       case Add(n1,n2) => evaluate(n1, environment) + evaluate(n2, environment)
@@ -36,24 +37,56 @@ object Calc {
     }
   }
 
+  def runStatements(statements: Statements, environment: Environment = Map.empty): Unit = {
+    statements match {
+      case Nil => ()
+      case statement => statement.head match {
+        case NakedExpression(e) => {
+          evaluate(e, environment)
+          runStatements(statements.drop(1), environment)
+        }
+        case VariableAssignment(name, e) => {
+          val newEnvironment = environment + (name -> e)
+          runStatements(statements.drop(1), newEnvironment)
+        }
+        case Print(e) => {
+          println(evaluate(e, environment))
+          runStatements(statements.drop(1), environment)
+        }
+      }
+    }
+  }
+
   def arithmeticExpressionHelper(sign: Char): Parser[(Expression, Expression)] = {
     for {
       _ <- char('(')
       n1 <- expressionCombinatorP
-      _ <- spaceChar
+      _ <- many(spaceChar)
       _ <- char(sign)
-      _ <- spaceChar
+      _ <- many(spaceChar)
       n2 <- expressionCombinatorP
       _ <- char(')')
     } yield (n1, n2)
   }
 
+  def printP: Parser[StatementType] = {
+    for {
+      _ <- string("print")
+      _ <- many(spaceChar)
+      _ <- char('(')
+      _ <- many(spaceChar)
+      e <- expressionCombinatorP
+      _ <- many(spaceChar)
+      _ <- char(')')
+    } yield Print(e)
+  }
+
   def variableAssignmentP: Parser[StatementType] = {
     for {
       n <- many1(letter).map(l => (l.list.toList.mkString))
-      _ <- spaceChar
+      _ <- many(spaceChar)
       _ <- char('=')
-      _ <- spaceChar
+      _ <- many(spaceChar)
       v <- expressionCombinatorP
     } yield VariableAssignment(n, v)
   }
@@ -65,9 +98,15 @@ object Calc {
   val divideP: Parser[Expression] = arithmeticExpressionHelper('/').map(v => Divide(v._1, v._2))
   val variableLookupP: Parser[Expression] = many1(letter).map(l => VariableLookup(l.list.toList.mkString))
   val expressionCombinatorP: Parser[Expression] = constantP | variableLookupP | addP | subtractP | multiplyP | divideP
+  val nakedExpressionP: Parser[StatementType] = expressionCombinatorP.map(x => NakedExpression(x))
+  val statementTypeP: Parser[StatementType] = printP | variableAssignmentP | nakedExpressionP
 
   def main(args: Array[String]): Unit = {
-    val test = expressionCombinatorP.parseOnly("(1 + 2)").done
-    println(test)
+    val statements: String = Source.fromFile("/Users/bass/Code/scala/calc-scala/src/main/resources/example.calc").mkString
+    val statementsParsed: ParseResult[Statements] = sepBy(statementTypeP, many(char('\n'))).parseOnly(statements).done
+    statementsParsed.either match {
+      case -\/(error) => println("error")
+      case \/-(result) => runStatements(result)
+    }
   }
 }
