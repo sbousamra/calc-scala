@@ -103,9 +103,9 @@ object Calc {
   def main(args: Array[String]): Unit = {
     val statements: String = Source.fromFile("/Users/bass/Code/scala/calc-scala/src/main/resources/example.calc").mkString
     val statementsParsed: ParseResult[Statements] = statementsP.parseOnly(statements).done
-    statementsParsed.either match {
-      case -\/(error) => println("error")
-      case \/-(result) => runStatements(result)
+    statementsParsed.option match {
+      case Some(result) => runStatements(result)
+      case None => println("error")
     }
   }
 }
