@@ -1,8 +1,6 @@
 import atto._
 import Atto._
-import atto.Parser.Internal.Fail
 import compat.scalaz._
-
 import scala.io.Source
 import scalaz.{-\/, \/-}
 
@@ -100,10 +98,11 @@ object Calc {
   val expressionCombinatorP: Parser[Expression] = constantP | variableLookupP | addP | subtractP | multiplyP | divideP
   val nakedExpressionP: Parser[StatementType] = expressionCombinatorP.map(x => NakedExpression(x))
   val statementTypeP: Parser[StatementType] = printP | variableAssignmentP | nakedExpressionP
+  val statementsP: Parser[Statements] = sepBy(statementTypeP, many(char('\n')))
 
   def main(args: Array[String]): Unit = {
     val statements: String = Source.fromFile("/Users/bass/Code/scala/calc-scala/src/main/resources/example.calc").mkString
-    val statementsParsed: ParseResult[Statements] = sepBy(statementTypeP, many(char('\n'))).parseOnly(statements).done
+    val statementsParsed: ParseResult[Statements] = statementsP.parseOnly(statements).done
     statementsParsed.either match {
       case -\/(error) => println("error")
       case \/-(result) => runStatements(result)
