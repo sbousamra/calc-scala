@@ -58,25 +58,18 @@ class CalcEvaluateSpec extends FunSpec with Matchers{
     }
   }
 
-  describe("Boolean ast test") {
-
-    it("should take in a a Bool with a true inside and return a boolean true") {
-      evaluateBoolean(Bool(true)) should be (true)
-    }
-
-    it("should take in two Expression that are equal and return true") {
-      val booleanToEvaluate = ExpressionB((Add(Constant(1), Constant(2))), Add(Constant(1), Constant(2)))
-      evaluateBoolean(booleanToEvaluate) should be (true)
-    }
-
-    it("should take in two Expression that are not equal and return false") {
-      val booleanToEvaluate = ExpressionB((Add(Constant(1), Constant(3))), Add(Constant(1), Constant(2)))
-      evaluateBoolean(booleanToEvaluate) should be (false)
-    }
-
-//    it("should take in two Expression that are not equal and return true") {
-//      val booleanToEvaluate = ExpressionB((Add(Constant(1), Constant(3))), Add(Constant(1), Constant(2)))
-//      evaluateBoolean(booleanToEvaluate) should be (true)
+//  describe("run method") {
+//    it("should run a NakedExpression to return an evaluate of Expression") {
+//      val nakedExpression = NakedExpression(Subtract(Constant(20), Constant(5)))
+//      runStatements(nakedExpression) should be (15)
 //    }
-  }
+//    it("should run a VariableAssignment to add a variable and its Expression to the environment") {
+//      val variableAssignment = VariableAssignment("x", Add(Constant(10), Constant(20)))
+//      runStatements(variableAssignment) should be (Map("x" -> Add(Constant(10), Constant(20))))
+//    }
+//    it("should run a Print returning a println of the Expression") {
+//      val print = Print(Divide(Constant(50), Constant(5)))
+//      runStatements(print) should be (10)
+//    }
+//  }
 }

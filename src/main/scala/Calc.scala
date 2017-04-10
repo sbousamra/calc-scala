@@ -23,31 +23,17 @@ object Calc {
   case class Divide(n1: Expression, n2: Expression) extends Expression
   case class VariableLookup(name: String) extends Expression
 
-  sealed trait Logic
-  case class Bool(b: Boolean) extends Logic
-  case class ExpressionB(e1: Expression, e2: Expression) extends Logic
 
-
-  def evaluate(e: Expression, environment: Environment = Map.empty): Number = {
+  def evaluate(e: Expression, environment: Environment): Number = {
     e match {
       case Constant(n) => n
-      case Add(n1, n2) => evaluate(n1, environment) + evaluate(n2, environment)
+      case Add(n1,n2) => evaluate(n1, environment) + evaluate(n2, environment)
       case Subtract(n1, n2) => evaluate(n1, environment) - evaluate(n2, environment)
       case Multiply(n1, n2) => evaluate(n1, environment) * evaluate(n2, environment)
       case Divide(n1, n2) => evaluate(n1, environment) / evaluate(n2, environment)
       case VariableLookup(name) => evaluate(environment.get(name).get, environment)
     }
   }
-
-
-  def evaluateBoolean(b: Logic): Boolean = {
-    b match {
-      case Bool(bool) => bool
-      case ExpressionB(e1, e2) => (e1, e2) match {
-        case equal => evaluateBoolean(Bool(evaluate(e1) == evaluate(e2)))
-      }
-      }
-    }
 
   def runStatements(statements: Statements, environment: Environment = Map.empty): Unit = {
     statements match {
