@@ -22,8 +22,7 @@ object Calc {
   case class Multiply(n1: Expression, n2: Expression) extends Expression
   case class Divide(n1: Expression, n2: Expression) extends Expression
   case class VariableLookup(name: String) extends Expression
-
-
+    
   def evaluate(e: Expression, environment: Environment): Number = {
     e match {
       case Constant(n) => n
