@@ -57,19 +57,4 @@ class CalcEvaluateSpec extends FunSpec with Matchers{
       variableLookupP.parseOnly("x").done should be (Done("", VariableLookup("x")))
     }
   }
-
-//  describe("run method") {
-//    it("should run a NakedExpression to return an evaluate of Expression") {
-//      val nakedExpression = NakedExpression(Subtract(Constant(20), Constant(5)))
-//      runStatements(nakedExpression) should be (15)
-//    }
-//    it("should run a VariableAssignment to add a variable and its Expression to the environment") {
-//      val variableAssignment = VariableAssignment("x", Add(Constant(10), Constant(20)))
-//      runStatements(variableAssignment) should be (Map("x" -> Add(Constant(10), Constant(20))))
-//    }
-//    it("should run a Print returning a println of the Expression") {
-//      val print = Print(Divide(Constant(50), Constant(5)))
-//      runStatements(print) should be (10)
-//    }
-//  }
 }
